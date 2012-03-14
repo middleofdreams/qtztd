@@ -54,7 +54,6 @@ class TaskListWidget(QtGui.QListWidget):
         if self.current:
             f=item.font()
             f.setWeight(500)
-            #f.setStrikeOut(True)
             item.setFont(f)
         QtGui.QListWidget.addItem(self,item)
         
@@ -74,9 +73,10 @@ class TaskListWidget(QtGui.QListWidget):
             i+=1
         print i
 class Task(QtGui.QListWidgetItem):
-    def __init__(self,text,itemid,parent=None,*args):
+    def __init__(self,text,itemid,done=False,parent=None,*args):
         QtGui.QListWidgetItem.__init__(self, text,parent, *args)
         self.itemid=itemid
+        if done: self.done()
     def clone(self):
         return Task(self.text(),self.itemid)
     def done(self):
