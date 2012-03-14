@@ -7,6 +7,9 @@ class TaskListWidget(QtGui.QListWidget):
         QtGui.QListWidget.__init__(self, parent, *args)
         self.setAcceptDrops(True)
         self.setDragEnabled(True)
+        self.showDropIndicator()
+        self.setDropIndicatorShown(True)
+        self.dropIndicatorPosition()
         self.connect(self, QtCore.SIGNAL("itemChanged(QListWidgetItem *)"), self.itemChanged) 
         self.connect(self, QtCore.SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.currentItemChanged) 
     
@@ -47,9 +50,8 @@ class TaskListWidget(QtGui.QListWidget):
     def itemChanged(self,item, *args):
         self.emit(QtCore.SIGNAL("editTask"),item.itemid,item.text())
         self.closePersistentEditor(item)
-    def dragMoveEvent(self, event):
-        event.setDropAction(QtCore.Qt.MoveAction)
-        event.accept()
+#    def dragMoveEvent(self, event):
+#        event.accept()
     def addItem(self,item):
         if self.current:
             f=item.font()
@@ -61,12 +63,31 @@ class TaskListWidget(QtGui.QListWidget):
     def dropEvent(self, event):
         #QtGui.QListWidget.dropEvent(self,event)
         item=event.source().currentItem().clone()
-        self.addItem(item)
-        print item.done_status
+        oldrow=event.source().row(event.source().currentItem())
+        o=event.source().takeItem(oldrow)
+        del(o)
+        cursorpos=self.mapFromGlobal(QtGui.QCursor.pos())
+        itembefore=self.itemAt(cursorpos)
+        print itembefore
+        if itembefore:
+            row=self.row(itembefore)
+            ibr= self.visualItemRect(itembefore)
+            h=ibr.y()+ibr.height()/2
+            print h
+            if cursorpos.y()<h:
+                self.insertItem(row-1, item)
+            else:
+                self.insertItem(row, item)
+
+
+        else:
+            self.addItem(item)
         if event.source()!=self:
             self.emit(QtCore.SIGNAL("moveTask"),item.itemid,self.date)
-        event.accept()
 
+        event.accept()       
+        self.emit(QtCore.SIGNAL("sortTasks"),self)
+        self.emit(QtCore.SIGNAL("sortTasks"),event.source())
 class Task(QtGui.QListWidgetItem):
     def __init__(self,text,itemid,done=False,parent=None,*args):
         QtGui.QListWidgetItem.__init__(self, text,parent, *args)
@@ -90,7 +111,7 @@ class TaskLineEdit(QtGui.QLineEdit):
     def __init__(self,date=None,parent=None,*args):
         QtGui.QLineEdit.__init__(self,parent, *args)
         self.connect(self, QtCore.SIGNAL("returnPressed()"), self.returnPressed) 
-
+        self.setMaxLength(30)
     def setDate(self,ldate):
         self.date=ldate
         if self.date<date.today():
@@ -98,8 +119,9 @@ class TaskLineEdit(QtGui.QLineEdit):
         else:
             self.setEnabled(True)
     def returnPressed(self):
-        text=self.text()
-        self.setText("")
-        self.emit(QtCore.SIGNAL("createTask"),text,self.date)
+        if not unicode(self.text()).strip()=="":
+            text=self.text()
+            self.setText("")
+            self.emit(QtCore.SIGNAL("createTask"),text,self.date)
 
         

@@ -4,6 +4,7 @@ from ztd_ui import Ui_MainWindow
 from helpers import *
 from db import DB
 from tasksmodel import *
+from worker import Worker
 class MyForm(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -13,6 +14,7 @@ class MyForm(QtGui.QMainWindow):
         self.db=DB('ztd.sqlite')
         self.prepareWidgets()
         self.fillWeek()
+        self.worker=Worker()
     def prepareWidgets(self):
         self.ui.weekdays=[self.ui.weekday1,self.ui.weekday2,self.ui.weekday3,self.ui.weekday4,self.ui.weekday5]
         self.ui.taskslists=[]
@@ -28,6 +30,7 @@ class MyForm(QtGui.QMainWindow):
             self.connect(taskwidget,QtCore.SIGNAL("editTask"),self.editTask)
             self.connect(lineedit,QtCore.SIGNAL("createTask"),self.createNewTask)
             self.connect(taskwidget,QtCore.SIGNAL("taskDone"),self.db.setToDone)
+            self.connect(taskwidget,QtCore.SIGNAL("sortTasks"),self.resortTask)
 
 
     def fillWeek(self):    
@@ -70,7 +73,8 @@ class MyForm(QtGui.QMainWindow):
         self.fillWeek()
     def createTask(self,name):
         return Task(name)
-   
+    def resortTask(self,widget):
+        self.worker.resort(self.db, widget)
 
 
  
