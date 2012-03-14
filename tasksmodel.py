@@ -57,7 +57,7 @@ class TaskListWidget(QtGui.QListWidget):
             item.setFont(f)
         QtGui.QListWidget.addItem(self,item)
         
-    
+    #testest
     def dropEvent(self, event):
         #QtGui.QListWidget.dropEvent(self,event)
         item=event.source().currentItem().clone()
