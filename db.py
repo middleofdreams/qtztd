@@ -22,10 +22,12 @@ class DB(object):
         c.execute('Update Tasks Set done=? Where id=?',t)
         c.close()
         self.conn.commit()
-    def setPos(self,itemid,pos):
+    def setPos(self,itemids,pos):
         c=self.conn.cursor()
-        t=(pos,itemid)
-        c.execute('Update Tasks Set pos=? Where id=?',t)
+        for i in pos:
+			t=(i,itemids[i])
+			print t
+			c.execute('Update Tasks Set pos=? Where id=?',t)
         c.close()
         self.conn.commit()
     def editTask(self,itemid,name):

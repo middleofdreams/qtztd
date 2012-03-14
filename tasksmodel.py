@@ -70,14 +70,8 @@ class TaskListWidget(QtGui.QListWidget):
         itembefore=self.itemAt(cursorpos)
         print itembefore
         if itembefore:
-            row=self.row(itembefore)
-            ibr= self.visualItemRect(itembefore)
-            h=ibr.y()+ibr.height()/2
-            print h
-            if cursorpos.y()<h:
-                self.insertItem(row-1, item)
-            else:
-                self.insertItem(row, item)
+			row=self.row(itembefore)
+			self.insertItem(row, item)
 
 
         else:
@@ -87,7 +81,7 @@ class TaskListWidget(QtGui.QListWidget):
 
         event.accept()       
         self.emit(QtCore.SIGNAL("sortTasks"),self)
-        self.emit(QtCore.SIGNAL("sortTasks"),event.source())
+        #self.emit(QtCore.SIGNAL("sortTasks"),event.source())
 class Task(QtGui.QListWidgetItem):
     def __init__(self,text,itemid,done=False,parent=None,*args):
         QtGui.QListWidgetItem.__init__(self, text,parent, *args)
