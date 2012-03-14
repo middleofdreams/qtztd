@@ -8,14 +8,12 @@ class TaskListWidget(QtGui.QListWidget):
         self.setAcceptDrops(True)
         self.setDragEnabled(True)
         self.connect(self, QtCore.SIGNAL("itemChanged(QListWidgetItem *)"), self.itemChanged) 
-        self.connect(self, QtCore.SIGNAL("itemPressed(QListWidgetItem *)"), self.itemDone) 
         self.connect(self, QtCore.SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.currentItemChanged) 
     
     def currentItemChanged(self,new,old):
         self.closePersistentEditor(old)
             
     def keyPressEvent(self,e):
-        print self.currentItem().text()
         if e.key()==QtCore.Qt.Key_Escape:
             self.closePersistentEditor(self.currentItem())
         
@@ -24,6 +22,8 @@ class TaskListWidget(QtGui.QListWidget):
         if item:
             if QtCore.Qt.LeftButton == mouseEvent.button():
                 item.done()
+                self.emit(QtCore.SIGNAL("taskDone"),item.itemid,item.done_status)
+
             else: self.openPersistentEditor(item)
             
 
@@ -62,27 +62,28 @@ class TaskListWidget(QtGui.QListWidget):
         #QtGui.QListWidget.dropEvent(self,event)
         item=event.source().currentItem().clone()
         self.addItem(item)
+        print item.done_status
         if event.source()!=self:
             self.emit(QtCore.SIGNAL("moveTask"),item.itemid,self.date)
         event.accept()
-        print self.date
-    def itemDone(self,event):
-        i=0
-        print QtCore.Qt.MouseButton()
-        while not QtCore.Qt.MouseButtons()==QtCore.Qt.NoButton:
-            i+=1
-        print i
+
 class Task(QtGui.QListWidgetItem):
     def __init__(self,text,itemid,done=False,parent=None,*args):
         QtGui.QListWidgetItem.__init__(self, text,parent, *args)
         self.itemid=itemid
+        self.done_status=done
         if done: self.done()
     def clone(self):
-        return Task(self.text(),self.itemid)
+        c= Task(self.text(),self.itemid)
+        c.done_status=self.done_status
+        if c.done_status:
+            c.done()
+        return c
     def done(self):
         f=self.font()
         f.setStrikeOut(not f.strikeOut())
         self.setFont(f)
+        self.done_status=f.strikeOut()
 
     
 class TaskLineEdit(QtGui.QLineEdit):

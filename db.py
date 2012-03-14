@@ -17,6 +17,13 @@ class DB(object):
         c.execute('Update Tasks Set due_date=? Where id=?',t)
         c.close()
         self.conn.commit()
+    def setToDone(self,itemid,done):
+        c=self.conn.cursor()
+        t=(done,itemid)
+        print t
+        c.execute('Update Tasks Set done=? Where id=?',t)
+        c.close()
+        self.conn.commit()
     def editTask(self,itemid,name):
         c=self.conn.cursor()
         t=(str(name),itemid)
@@ -29,5 +36,7 @@ class DB(object):
         t=(str(name),ddate)
         print t
         c.execute('Insert into Tasks (name,due_date) Values (?,?)',t)
+        newid=c.lastrowid
         c.close()
         self.conn.commit()
+        return newid

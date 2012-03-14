@@ -27,6 +27,7 @@ class MyForm(QtGui.QMainWindow):
             self.connect(taskwidget,QtCore.SIGNAL("moveTask"),self.moveTask)
             self.connect(taskwidget,QtCore.SIGNAL("editTask"),self.editTask)
             self.connect(lineedit,QtCore.SIGNAL("createTask"),self.createNewTask)
+            self.connect(taskwidget,QtCore.SIGNAL("taskDone"),self.db.setToDone)
 
 
     def fillWeek(self):    
@@ -39,7 +40,7 @@ class MyForm(QtGui.QMainWindow):
             self.ui.taskslists[i].setDate(weekdays[i])
             self.ui.lineeditlist[i].setDate(weekdays[i])
             for j in tasks:
-                self.ui.taskslists[i].addItem(Task(j[1],j[0]))
+                self.ui.taskslists[i].addItem(Task(j[1],j[0],j[9]))
            
     
     def moveTask(self,itemid,date):
@@ -47,7 +48,10 @@ class MyForm(QtGui.QMainWindow):
     def editTask(self,itemid,name):
         self.db.editTask(itemid,name)
     def createNewTask(self,name,tdate):
-        self.db.createTask(name,tdate)
+        newid=self.db.createTask(name,tdate)
+        for i in self.ui.taskslists:
+            if i.date==tdate:
+                i.addItem(Task(name,newid))
     @QtCore.pyqtSlot()
     def on_next_clicked(self):
         self.v+=1
