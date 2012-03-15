@@ -57,7 +57,8 @@ class DB(object):
         c.execute('select * from tasks WHERE name=? COLLATE NOCASE',t)
         r=c.fetchall()
         c.close()
+        print len(r)
         if len(r)==0:
-            return True
-        else:
             return False
+        else:
+            return r[0]
