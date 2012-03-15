@@ -1,5 +1,6 @@
 from PyQt4 import QtCore,QtGui
 from datetime import date
+import sip
 class TaskListWidget(QtGui.QListWidget):
     def __init__(self, parent=None, *args): 
         """ datain: a list where each item is a row
@@ -48,38 +49,48 @@ class TaskListWidget(QtGui.QListWidget):
     
 
     def itemChanged(self,item, *args):
-        self.emit(QtCore.SIGNAL("editTask"),item.itemid,item.text())
-        self.closePersistentEditor(item)
+        if isinstance(item,Task):
+            self.emit(QtCore.SIGNAL("editTask"),item.itemid,item.text())
+            self.closePersistentEditor(item)
 #    def dragMoveEvent(self, event):
 #        event.accept()
     def addItem(self,item):
-        if self.current:
-            f=item.font()
-            f.setWeight(500)
-            item.setFont(f)
+        self.boldItem(item)
         QtGui.QListWidget.addItem(self,item)
-        
+    def insertItem(self,row,item):
+        self.boldItem(item)
+        QtGui.QListWidget.insertItem(self,row,item)       
     #testest
+    def boldItem(self,item):
+        if self.current:b=500
+        else: b=50
+        f=item.font()
+        f.setWeight(b)
+        item.setFont(f)
+        
     def dropEvent(self, event):
-        #QtGui.QListWidget.dropEvent(self,event)
-        item=event.source().currentItem().clone()
-        oldrow=event.source().row(event.source().currentItem())
-        o=event.source().takeItem(oldrow)
-        del(o)
-        cursorpos=self.mapFromGlobal(QtGui.QCursor.pos())
-        itembefore=self.itemAt(cursorpos)
-        print itembefore
-        if itembefore:
-			row=self.row(itembefore)
-			self.insertItem(row, item)
+        self.setDisabled(True)
+        olditem=event.source().currentItem()
+        temp=olditem.clone()   
+        currentrow=event.source().row(olditem)
+        QtGui.QListWidget.dropEvent(self,event)
 
-
-        else:
-            self.addItem(item)
+        newItem=self.findItems(olditem.text(),QtCore.Qt.MatchExactly)[0]
+        row=self.row(newItem)
         if event.source()!=self:
+            o=self.takeItem(row)
+            del(o)
+            item=event.source().takeItem(currentrow)
+            print item
+            self.insertItem(row,item)
             self.emit(QtCore.SIGNAL("moveTask"),item.itemid,self.date)
-
+        else:
+            o=self.takeItem(row)
+            del(o)
+            event.source().takeItem(currentrow)
+            self.insertItem(row,temp.clone())  
         event.accept()       
+        self.setEnabled(True)
         self.emit(QtCore.SIGNAL("sortTasks"),self)
         #self.emit(QtCore.SIGNAL("sortTasks"),event.source())
 class Task(QtGui.QListWidgetItem):

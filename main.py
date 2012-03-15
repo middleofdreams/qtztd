@@ -14,7 +14,6 @@ class MyForm(QtGui.QMainWindow):
         self.db=DB('ztd.sqlite')
         self.prepareWidgets()
         self.fillWeek()
-        self.worker=Worker()
     def prepareWidgets(self):
         self.ui.weekdays=[self.ui.weekday1,self.ui.weekday2,self.ui.weekday3,self.ui.weekday4,self.ui.weekday5]
         self.ui.taskslists=[]
@@ -51,10 +50,11 @@ class MyForm(QtGui.QMainWindow):
     def editTask(self,itemid,name):
         self.db.editTask(itemid,name)
     def createNewTask(self,name,tdate):
-        newid=self.db.createTask(name,tdate)
-        for i in self.ui.taskslists:
-            if i.date==tdate:
-                i.addItem(Task(name,newid))
+        if self.db.checkIfNew(name):
+            newid=self.db.createTask(name,tdate)
+            for i in self.ui.taskslists:
+                if i.date==tdate:
+                    i.addItem(Task(name,newid))
     @QtCore.pyqtSlot()
     def on_next_clicked(self):
         self.v+=1
@@ -74,7 +74,13 @@ class MyForm(QtGui.QMainWindow):
     def createTask(self,name):
         return Task(name)
     def resortTask(self,widget):
-        self.worker.resort(self.db, widget)
+        items=[]
+        pos=[]
+        for i in range(widget.count()):
+            items.append(widget.item(i).itemid)
+            pos.append(i)
+        self.worker=Worker(items,pos,self)
+        self.worker.run()
 
 
  

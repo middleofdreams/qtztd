@@ -25,9 +25,8 @@ class DB(object):
     def setPos(self,itemids,pos):
         c=self.conn.cursor()
         for i in pos:
-			t=(i,itemids[i])
-			print t
-			c.execute('Update Tasks Set pos=? Where id=?',t)
+            t=(i,itemids[i])
+            c.execute('Update Tasks Set pos=? Where id=?',t)
         c.close()
         self.conn.commit()
     def editTask(self,itemid,name):
@@ -52,3 +51,14 @@ class DB(object):
         c.execute("Update Tasks Set ?=? Where id=?",t)
         c.close()
         self.conn.commit()
+    def checkIfNew(self,name):
+        c=self.conn.cursor()
+        print name
+        t=(str(name),)
+        c.execute('select * from tasks WHERE name=?',t)
+        r=c.fetchall()
+        c.close()
+        if len(r)==0:
+            return True
+        else:
+            return False
