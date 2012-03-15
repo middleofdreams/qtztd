@@ -75,7 +75,7 @@ class TaskListWidget(QtGui.QListWidget):
         item.setFont(f)
         
     def dropEvent(self, event):
-        self.setDisabled(True)
+        #self.setDisabled(True)
         olditem=event.source().currentItem()
         currentrow=event.source().row(olditem)
         item=event.source().takeItem(currentrow)
@@ -91,7 +91,7 @@ class TaskListWidget(QtGui.QListWidget):
             del(olditem)
             self.insertItem(row,item)  
         event.accept()       
-        self.setEnabled(True)
+        #self.setEnabled(True)
         self.emit(QtCore.SIGNAL("sortTasks"),self)
         #self.emit(QtCore.SIGNAL("sortTasks"),event.source())
 class Task(QtGui.QListWidgetItem):

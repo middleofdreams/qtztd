@@ -50,6 +50,7 @@ class MyForm(QtGui.QMainWindow):
     def editTask(self,itemid,name):
         self.db.editTask(itemid,name)
     def createNewTask(self,name,tdate):
+        name=str(name).strp()
         if self.db.checkIfNew(name):
             newid=self.db.createTask(name,tdate)
             for i in self.ui.taskslists:
