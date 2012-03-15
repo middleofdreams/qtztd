@@ -1,6 +1,5 @@
 from datetime import date,timedelta
 def daysOfweek(v=0):
-    print v
     names=["Monday","Tuesday","Thursday","Wednesday","Friday","Saturday","Sunday"]
     today=date.today()
     weekday=today.weekday()
@@ -12,3 +11,12 @@ def daysOfweek(v=0):
         week.append(day)
         daynames.append(names[day.weekday()])
     return week,daynames
+def ifWeekend():
+    wd=date.today().weekday()
+    if wd==5:
+        return 3
+    elif wd==6:
+        return 4
+    else:
+        return 0
+        

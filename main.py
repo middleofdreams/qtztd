@@ -10,7 +10,7 @@ class MyForm(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.v=0
+        self.v=ifWeekend()
         self.db=DB('ztd.sqlite')
         self.prepareWidgets()
         self.fillWeek()
@@ -77,6 +77,7 @@ class MyForm(QtGui.QMainWindow):
         items=[]
         pos=[]
         for i in range(widget.count()):
+            print widget.item(i).text()
             items.append(widget.item(i).itemid)
             pos.append(i)
         self.worker=Worker(items,pos,self)

@@ -13,7 +13,7 @@ class TaskListWidget(QtGui.QListWidget):
         self.dropIndicatorPosition()
         self.connect(self, QtCore.SIGNAL("itemChanged(QListWidgetItem *)"), self.itemChanged) 
         self.connect(self, QtCore.SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.currentItemChanged) 
-    
+        self.past=False
     def currentItemChanged(self,new,old):
         self.closePersistentEditor(old)
             
@@ -25,8 +25,9 @@ class TaskListWidget(QtGui.QListWidget):
         item= self.itemAt(mouseEvent.pos())
         if item:
             if QtCore.Qt.LeftButton == mouseEvent.button():
-                item.done()
-                self.emit(QtCore.SIGNAL("taskDone"),item.itemid,item.done_status)
+                if not self.past:
+                    item.done()
+                    self.emit(QtCore.SIGNAL("taskDone"),item.itemid,item.done_status)
 
             else: self.openPersistentEditor(item)
             
@@ -41,7 +42,8 @@ class TaskListWidget(QtGui.QListWidget):
             qpal.setColor(QtGui.QPalette.Base,QtGui.QColor('#F5F3C4'))
             self.setPalette(qpal)
         elif self.date<date.today():
-            self.setAcceptDrops(False)
+            #self.setAcceptDrops(False)
+            self.past=True
             qpal.setColor(QtGui.QPalette.Base,QtGui.QColor('#C9C9C9'))
             self.setPalette(qpal)     
         else:
@@ -52,8 +54,12 @@ class TaskListWidget(QtGui.QListWidget):
         if isinstance(item,Task):
             self.emit(QtCore.SIGNAL("editTask"),item.itemid,item.text())
             self.closePersistentEditor(item)
-#    def dragMoveEvent(self, event):
-#        event.accept()
+    def dragMoveEvent(self, event):
+        if event.source().currentItem().done_status or not self.past:
+            event.accept()
+            QtGui.QListWidget.dragMoveEvent(self,event)
+        else:
+            event.ignore()
     def addItem(self,item):
         self.boldItem(item)
         QtGui.QListWidget.addItem(self,item)
@@ -71,24 +77,19 @@ class TaskListWidget(QtGui.QListWidget):
     def dropEvent(self, event):
         self.setDisabled(True)
         olditem=event.source().currentItem()
-        temp=olditem.clone()   
         currentrow=event.source().row(olditem)
+        item=event.source().takeItem(currentrow)
         QtGui.QListWidget.dropEvent(self,event)
-
         newItem=self.findItems(olditem.text(),QtCore.Qt.MatchExactly)[0]
         row=self.row(newItem)
+        o=self.takeItem(row)
+        del(o)
         if event.source()!=self:
-            o=self.takeItem(row)
-            del(o)
-            item=event.source().takeItem(currentrow)
-            print item
             self.insertItem(row,item)
             self.emit(QtCore.SIGNAL("moveTask"),item.itemid,self.date)
         else:
-            o=self.takeItem(row)
-            del(o)
-            event.source().takeItem(currentrow)
-            self.insertItem(row,temp.clone())  
+            del(olditem)
+            self.insertItem(row,item)  
         event.accept()       
         self.setEnabled(True)
         self.emit(QtCore.SIGNAL("sortTasks"),self)
@@ -99,6 +100,7 @@ class Task(QtGui.QListWidgetItem):
         self.itemid=itemid
         self.done_status=done
         if done: self.done()
+        self.setData(3,itemid)
     def clone(self):
         c= Task(self.text(),self.itemid)
         c.done_status=self.done_status
