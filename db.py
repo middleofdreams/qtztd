@@ -36,7 +36,6 @@ class DB(object):
         c.close()
         self.conn.commit()
     def createTask(self,name,ddate=None):
-        self
         c=self.conn.cursor()
         pos=len(self.getForDate(ddate))
         t=(str(name),ddate,pos)
@@ -55,10 +54,11 @@ class DB(object):
         c=self.conn.cursor()
         print name
         t=(str(name),)
-        c.execute('select * from tasks WHERE name=?',t)
+        c.execute('select * from tasks WHERE name=? COLLATE NOCASE',t)
         r=c.fetchall()
         c.close()
+        print len(r)
         if len(r)==0:
-            return True
-        else:
             return False
+        else:
+            return r[0]

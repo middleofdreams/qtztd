@@ -52,11 +52,18 @@ class MyForm(QtGui.QMainWindow):
     def editTask(self,itemid,name):
         self.db.editTask(itemid,name)
     def createNewTask(self,name,tdate):
-        if self.db.checkIfNew(name):
+        name=str(name).strip()
+        ifnew=self.db.checkIfNew(name)
+        if not ifnew:
             newid=self.db.createTask(name,tdate)
             for i in self.ui.taskslists:
                 if i.date==tdate:
                     i.addItem(Task(name,newid))
+        else:
+            msg=QtGui.QMessageBox(self)
+            msg.setWindowTitle("Error")
+            msg.setText("Task already exists. It's marked due date: %s"%str(ifnew[2]))
+            msg.show()
     @QtCore.pyqtSlot()
     def on_next_clicked(self):
         self.v+=1
