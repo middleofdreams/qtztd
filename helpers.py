@@ -1,4 +1,4 @@
-from datetime import date,timedelta
+from datetime import date,timedelta,time
 def daysOfweek(v=0):
     names=["Monday","Tuesday","Thursday","Wednesday","Friday","Saturday","Sunday"]
     today=date.today()
@@ -20,3 +20,6 @@ def ifWeekend():
     else:
         return 0
         
+def toDate(datestr):
+    return time.strptime(datestr,"%Y-%m-%d")
+                

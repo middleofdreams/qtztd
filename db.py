@@ -62,3 +62,9 @@ class DB(object):
             return False
         else:
             return r[0]
+    def deleteTask(self,itemid,):
+        c=self.conn.cursor()
+        t=(itemid,)
+        c.execute("Delete from Tasks Where id=?",t)
+        c.close()
+        self.conn.commit()

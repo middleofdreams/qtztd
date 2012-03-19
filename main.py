@@ -15,6 +15,7 @@ class MyForm(QtGui.QMainWindow):
         self.prepareWidgets()
         self.fillWeek()
         self.ui.bottomPnl.hide()
+        self.options={'bottomPnlHidden':True}
     def prepareWidgets(self):
         self.ui.weekdays=[self.ui.weekday1,self.ui.weekday2,self.ui.weekday3,self.ui.weekday4,self.ui.weekday5,self.ui.inbox,self.ui.thisweek,self.ui.waiting,self.ui.someday]
         self.ui.taskslists=[]
@@ -32,20 +33,24 @@ class MyForm(QtGui.QMainWindow):
             self.connect(taskwidget,QtCore.SIGNAL("taskDone"),self.db.setToDone)
             self.connect(taskwidget,QtCore.SIGNAL("sortTasks"),self.resortTask)
         self.ui.delete_label.setAcceptDrops(True)
-
+        self.ui.delete_label.dropEvent=self.ldropEvent
+        self.ui.delete_label.dragMoveEvent=self.ldragMoveEvent
+        self.ui.delete_label.dragEnterEvent=self.ldragMoveEvent
 
     def fillWeek(self):    
         weekdays,names=daysOfweek(self.v)
-        #weekdays+=['inbox','thisweek','waiting','someday']
-        for i in range(0,5):
-            label=eval("self.ui.daylabel"+str(i+1))
-            label.setText(str(names[i])+"<br/>"+str(weekdays[i]))
-            tasks=self.db.getForDate(weekdays[i])
+        weekdays+=['inbox','waiting','someday']
+        for i in range(0,8):
             self.ui.taskslists[i].clear()
             self.ui.taskslists[i].setDate(weekdays[i])
             self.ui.lineeditlist[i].setDate(weekdays[i])
+            if i<5:
+                label=eval("self.ui.daylabel"+str(i+1))
+                label.setText(str(names[i])+"<br/>"+str(weekdays[i]))
+            tasks=self.db.getForDate(weekdays[i])
             for j in tasks:
-                self.ui.taskslists[i].addItem(Task(j[1],j[0],j[9]))
+                print j
+                self.ui.taskslists[i].addItem(Task(j[1],j[0],j[6]))
            
     def moveTask(self,itemid,date):
         self.db.moveForDate(itemid, date)
@@ -80,6 +85,14 @@ class MyForm(QtGui.QMainWindow):
     def on_back_week_clicked(self):
         self.v-=7
         self.fillWeek()
+    @QtCore.pyqtSlot()
+    def on_bottomPanel_btn_clicked(self):
+        if self.options['bottomPnlHidden']:
+            self.options['bottomPnlHidden']=False
+            self.ui.bottomPnl.show()
+        else:
+            self.options['bottomPnlHidden']=True
+            self.ui.bottomPnl.hide()            
     def createTask(self,name):
         return Task(name)
     def resortTask(self,widget):
@@ -91,8 +104,14 @@ class MyForm(QtGui.QMainWindow):
             pos.append(i)
         self.worker=Worker(items,pos,self)
         self.worker.run()
-
-
+    def ldropEvent(self,e):
+        e.accept()
+        r=e.source().row(e.source().currentItem())
+        item=e.source().takeItem(r)
+        self.db.deleteTask(item.itemid)
+        del(item)
+    def ldragMoveEvent(self,e):
+        e.accept()
  
 if __name__ == "__main__":
     

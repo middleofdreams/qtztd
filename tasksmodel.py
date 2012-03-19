@@ -37,18 +37,20 @@ class TaskListWidget(QtGui.QListWidget):
         self.current=False
         self.setAcceptDrops(True)
         self.date=tdate
-        qpal=QtGui.QPalette()
-        if self.date==date.today():
-            self.current=True
-            qpal.setColor(QtGui.QPalette.Base,QtGui.QColor('#F5F3C4'))
-            self.setPalette(qpal)
-        elif self.date<date.today():
-            #self.setAcceptDrops(False)
-            self.past=True
-            qpal.setColor(QtGui.QPalette.Base,QtGui.QColor('#C9C9C9'))
-            self.setPalette(qpal)     
-        else:
-            self.setPalette(qpal) 
+        slist=['inbox','someday','thisweek','waiting']
+        if not (tdate in slist):
+            qpal=QtGui.QPalette()
+            if self.date==date.today():
+                self.current=True
+                qpal.setColor(QtGui.QPalette.Base,QtGui.QColor('#F5F3C4'))
+                self.setPalette(qpal)
+            elif self.date<date.today():
+                #self.setAcceptDrops(False)
+                self.past=True
+                qpal.setColor(QtGui.QPalette.Base,QtGui.QColor('#C9C9C9'))
+                self.setPalette(qpal)     
+            else:
+                self.setPalette(qpal) 
     
 
     def itemChanged(self,item, *args):
@@ -122,10 +124,12 @@ class TaskLineEdit(QtGui.QLineEdit):
         self.setMaxLength(30)
     def setDate(self,ldate):
         self.date=ldate
-        if self.date<date.today():
-            self.setDisabled(True)
-        else:
-            self.setEnabled(True)
+        slist=['inbox','someday','thisweek','waiting']
+        if not (ldate in slist):
+            if self.date<date.today():
+                self.setDisabled(True)
+            else:
+                self.setEnabled(True)
     def returnPressed(self):
         if not unicode(self.text()).strip()=="":
             text=self.text()
