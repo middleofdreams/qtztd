@@ -25,7 +25,8 @@ class TaskListWidget(QtGui.QListWidget):
         item= self.itemAt(mouseEvent.pos())
         if item:
             if QtCore.Qt.LeftButton == mouseEvent.button():
-                if not self.past:
+                item.done_status
+                if not self.past or item.done_status==None or item.done_status==False:
                     item.done()
                     self.emit(QtCore.SIGNAL("taskDone"),item.itemid,item.done_status)
 

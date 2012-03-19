@@ -14,11 +14,12 @@ class MyForm(QtGui.QMainWindow):
         self.db=DB('ztd.sqlite')
         self.prepareWidgets()
         self.fillWeek()
+        self.ui.bottomPnl.hide()
     def prepareWidgets(self):
-        self.ui.weekdays=[self.ui.weekday1,self.ui.weekday2,self.ui.weekday3,self.ui.weekday4,self.ui.weekday5]
+        self.ui.weekdays=[self.ui.weekday1,self.ui.weekday2,self.ui.weekday3,self.ui.weekday4,self.ui.weekday5,self.ui.inbox,self.ui.thisweek,self.ui.waiting,self.ui.someday]
         self.ui.taskslists=[]
         self.ui.lineeditlist=[]
-        for i in range(0,5):
+        for i in range(0,9):
             taskwidget=TaskListWidget()
             lineedit=TaskLineEdit()
             self.ui.lineeditlist.append(lineedit)
@@ -30,10 +31,12 @@ class MyForm(QtGui.QMainWindow):
             self.connect(lineedit,QtCore.SIGNAL("createTask"),self.createNewTask)
             self.connect(taskwidget,QtCore.SIGNAL("taskDone"),self.db.setToDone)
             self.connect(taskwidget,QtCore.SIGNAL("sortTasks"),self.resortTask)
+        self.ui.delete_label.setAcceptDrops(True)
 
 
     def fillWeek(self):    
         weekdays,names=daysOfweek(self.v)
+        #weekdays+=['inbox','thisweek','waiting','someday']
         for i in range(0,5):
             label=eval("self.ui.daylabel"+str(i+1))
             label.setText(str(names[i])+"<br/>"+str(weekdays[i]))
@@ -44,7 +47,6 @@ class MyForm(QtGui.QMainWindow):
             for j in tasks:
                 self.ui.taskslists[i].addItem(Task(j[1],j[0],j[9]))
            
-    
     def moveTask(self,itemid,date):
         self.db.moveForDate(itemid, date)
     def editTask(self,itemid,name):
