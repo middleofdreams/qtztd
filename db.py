@@ -10,10 +10,20 @@ class DB(object):
         r=c.fetchall()
         c.close()
         return r
-    def moveForDate(self,itemid,date):
+    def getForWeek(self,week,withoutdates=False):
         c=self.conn.cursor()
-        t=(str(date),itemid)
-        c.execute('Update Tasks Set due_date=? Where id=?',t)
+        t=(week,)
+        if withoutdates:
+            c.execute('select * from tasks WHERE due_date="thisweek" and due_week=? ORDER BY pos',t)
+        else:
+            c.execute('select * from tasks WHERE  due_week=? ORDER BY pos',t)
+        r=c.fetchall()
+        c.close()
+        return r
+    def moveForDate(self,itemid,date,due_week=None):
+        c=self.conn.cursor()
+        t=(str(date),due_week,itemid)
+        c.execute('Update Tasks Set due_date=?, due_week=? Where id=?',t)
         c.close()
         self.conn.commit()
     def setToDone(self,itemid,done):
@@ -35,11 +45,14 @@ class DB(object):
         c.execute('Update Tasks Set name=? Where id=?',t)
         c.close()
         self.conn.commit()
-    def createTask(self,name,ddate=None):
+    def createTask(self,name,ddate=None,due_week=None):
         c=self.conn.cursor()
-        pos=len(self.getForDate(ddate))
-        t=(str(name),ddate,pos)
-        c.execute('Insert into Tasks (name,due_date,pos) Values (?,?,?)',t)
+        if ddate=="thisweek":
+            pos=len(self.getForWeek(due_week,True))
+        else:
+            pos=len(self.getForDate(ddate))
+        t=(str(name),ddate,pos,due_week)
+        c.execute('Insert into Tasks (name,due_date,pos,due_week) Values (?,?,?,?)',t)
         newid=c.lastrowid
         c.close()
         self.conn.commit()

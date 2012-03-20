@@ -1,6 +1,7 @@
 from PyQt4 import QtCore,QtGui
 from datetime import date
 import sip
+from helpers import getWeekNr
 class TaskListWidget(QtGui.QListWidget):
     def __init__(self, parent=None, *args): 
         """ datain: a list where each item is a row
@@ -33,13 +34,15 @@ class TaskListWidget(QtGui.QListWidget):
             else: self.openPersistentEditor(item)
             
 
-    def setDate(self,tdate):
+    def setDate(self,tdate,week=None):
         self.current=False
         self.setAcceptDrops(True)
         self.date=tdate
+        self.week=week
         slist=['inbox','someday','thisweek','waiting']
         if not (tdate in slist):
             qpal=QtGui.QPalette()
+            self.week=getWeekNr(day=tdate)
             if self.date==date.today():
                 self.current=True
                 qpal.setColor(QtGui.QPalette.Base,QtGui.QColor('#F5F3C4'))
@@ -51,7 +54,6 @@ class TaskListWidget(QtGui.QListWidget):
                 self.setPalette(qpal)     
             else:
                 self.setPalette(qpal) 
-    
 
     def itemChanged(self,item, *args):
         if isinstance(item,Task):
@@ -89,7 +91,7 @@ class TaskListWidget(QtGui.QListWidget):
         del(o)
         if event.source()!=self:
             self.insertItem(row,item)
-            self.emit(QtCore.SIGNAL("moveTask"),item.itemid,self.date)
+            self.emit(QtCore.SIGNAL("moveTask"),item,self.date,self.week)
         else:
             del(olditem)
             self.insertItem(row,item)  
@@ -122,18 +124,21 @@ class TaskLineEdit(QtGui.QLineEdit):
         QtGui.QLineEdit.__init__(self,parent, *args)
         self.connect(self, QtCore.SIGNAL("returnPressed()"), self.returnPressed) 
         self.setMaxLength(30)
-    def setDate(self,ldate):
+    def setDate(self,ldate,week=None):
         self.date=ldate
+        self.week=week
         slist=['inbox','someday','thisweek','waiting']
         if not (ldate in slist):
+            self.week=getWeekNr(day=self.date)
             if self.date<date.today():
                 self.setDisabled(True)
             else:
                 self.setEnabled(True)
+        
     def returnPressed(self):
         if not unicode(self.text()).strip()=="":
             text=self.text()
             self.setText("")
-            self.emit(QtCore.SIGNAL("createTask"),text,self.date)
+            self.emit(QtCore.SIGNAL("createTask"),text,self.date,self.week)
 
         

@@ -22,4 +22,8 @@ def ifWeekend():
         
 def toDate(datestr):
     return time.strptime(datestr,"%Y-%m-%d")
-                
+def getWeekNr(v=0,day=None):
+    if day!=None:today=day
+    else:
+        today=date.today()+timedelta(v)
+    return today.isocalendar()[1]

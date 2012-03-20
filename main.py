@@ -17,7 +17,7 @@ class MyForm(QtGui.QMainWindow):
         self.ui.bottomPnl.hide()
         self.options={'bottomPnlHidden':True}
     def prepareWidgets(self):
-        self.ui.weekdays=[self.ui.weekday1,self.ui.weekday2,self.ui.weekday3,self.ui.weekday4,self.ui.weekday5,self.ui.inbox,self.ui.thisweek,self.ui.waiting,self.ui.someday]
+        self.ui.weekdays=[self.ui.weekday1,self.ui.weekday2,self.ui.weekday3,self.ui.weekday4,self.ui.weekday5,self.ui.inbox,self.ui.someday,self.ui.waiting,self.ui.thisweek]
         self.ui.taskslists=[]
         self.ui.lineeditlist=[]
         for i in range(0,9):
@@ -39,7 +39,7 @@ class MyForm(QtGui.QMainWindow):
 
     def fillWeek(self):    
         weekdays,names=daysOfweek(self.v)
-        weekdays+=['inbox','waiting','someday']
+        weekdays+=['inbox','someday','waiting',]
         for i in range(0,8):
             self.ui.taskslists[i].clear()
             self.ui.taskslists[i].setDate(weekdays[i])
@@ -49,18 +49,27 @@ class MyForm(QtGui.QMainWindow):
                 label.setText(str(names[i])+"<br/>"+str(weekdays[i]))
             tasks=self.db.getForDate(weekdays[i])
             for j in tasks:
-                print j
                 self.ui.taskslists[i].addItem(Task(j[1],j[0],j[6]))
-           
-    def moveTask(self,itemid,date):
-        self.db.moveForDate(itemid, date)
+        self.ui.taskslists[8].clear()
+        self.ui.taskslists[8].setDate("thisweek")
+        self.ui.taskslists[8].week=getWeekNr()
+        self.ui.lineeditlist[8].setDate("thisweek")
+        tasks=self.db.getForWeek(getWeekNr())
+        for j in tasks:
+            self.ui.taskslists[8].addItem(Task(j[1],j[0],j[6]))
+
+
+          
+    def moveTask(self,item,date,week):
+        self.db.moveForDate(item.itemid, date, week)
+
     def editTask(self,itemid,name):
         self.db.editTask(itemid,name)
-    def createNewTask(self,name,tdate):
+    def createNewTask(self,name,tdate,due_week):
         name=str(name).strip()
         ifnew=self.db.checkIfNew(name)
         if not ifnew:
-            newid=self.db.createTask(name,tdate)
+            newid=self.db.createTask(name,tdate,due_week)
             for i in self.ui.taskslists:
                 if i.date==tdate:
                     i.addItem(Task(name,newid))
