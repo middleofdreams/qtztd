@@ -30,8 +30,9 @@ class MyForm(QtGui.QMainWindow):
             self.connect(taskwidget,QtCore.SIGNAL("moveTask"),self.moveTask)
             self.connect(taskwidget,QtCore.SIGNAL("editTask"),self.editTask)
             self.connect(lineedit,QtCore.SIGNAL("createTask"),self.createNewTask)
-            self.connect(taskwidget,QtCore.SIGNAL("taskDone"),self.db.setToDone)
+            self.connect(taskwidget,QtCore.SIGNAL("taskDone"),self.taskDone)
             self.connect(taskwidget,QtCore.SIGNAL("sortTasks"),self.resortTask)
+
         self.ui.delete_label.setAcceptDrops(True)
         self.ui.delete_label.dropEvent=self.ldropEvent
         self.ui.delete_label.dragMoveEvent=self.ldragMoveEvent
@@ -54,17 +55,32 @@ class MyForm(QtGui.QMainWindow):
         self.ui.taskslists[8].setDate("thisweek")
         self.ui.taskslists[8].week=getWeekNr()
         self.ui.lineeditlist[8].setDate("thisweek")
+        self.loadThisWeek()
+    def loadThisWeek(self):
+        self.ui.taskslists[8].clear()
+        self.ui.taskslists[8].setDate("thisweek")
+        self.ui.taskslists[8].week=getWeekNr()
+        self.ui.lineeditlist[8].setDate("thisweek")
         tasks=self.db.getForWeek(getWeekNr())
+        assigned=[]
         for j in tasks:
-            self.ui.taskslists[8].addItem(Task(j[1],j[0],j[6]))
-
-
-          
+            n=Task(j[1],j[0],j[6])
+            if j[2]!="thisweek":
+                assigned.append(n)
+                n.setFlags(QtCore.Qt.ItemFlags())
+            else:
+                self.ui.taskslists[8].addItem(n)
+        for i in assigned:
+            self.ui.taskslists[8].addItem(i)
     def moveTask(self,item,date,week):
         self.db.moveForDate(item.itemid, date, week)
+        if date!="thisweek":
+            self.loadThisWeek()
 
     def editTask(self,itemid,name):
         self.db.editTask(itemid,name)
+        self.loadThisWeek()
+
     def createNewTask(self,name,tdate,due_week):
         name=str(name).strip()
         ifnew=self.db.checkIfNew(name)
@@ -73,6 +89,7 @@ class MyForm(QtGui.QMainWindow):
             for i in self.ui.taskslists:
                 if i.date==tdate:
                     i.addItem(Task(name,newid))
+            if due_week==getWeekNr():self.loadThisWeek()
         else:
             msg=QtGui.QMessageBox(self)
             msg.setWindowTitle("Error")
@@ -104,14 +121,22 @@ class MyForm(QtGui.QMainWindow):
             self.ui.bottomPnl.hide()            
     def createTask(self,name):
         return Task(name)
+    def taskDone(self,itemid,done):
+        self.db.setToDone(itemid,done)
+        self.loadThisWeek()
     def resortTask(self,widget):
         items=[]
         pos=[]
+        disableds=0
         for i in range(widget.count()):
-            print widget.item(i).text()
-            items.append(widget.item(i).itemid)
-            pos.append(i)
+            if widget.item(i).flags()==QtCore.Qt.ItemFlags():
+                disableds+=1
+            else:
+                items.append(widget.item(i).itemid)
+            pos.append(i-disableds)
         self.worker=Worker(items,pos,self)
+        self.connect(self.worker,QtCore.SIGNAL("finished"),self.loadThisWeek)
+
         self.worker.run()
     def ldropEvent(self,e):
         e.accept()
@@ -119,6 +144,7 @@ class MyForm(QtGui.QMainWindow):
         item=e.source().takeItem(r)
         self.db.deleteTask(item.itemid)
         del(item)
+        self.loadThisWeek()
     def ldragMoveEvent(self,e):
         e.accept()
  

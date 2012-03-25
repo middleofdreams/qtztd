@@ -12,8 +12,10 @@ class TaskListWidget(QtGui.QListWidget):
         self.showDropIndicator()
         self.setDropIndicatorShown(True)
         self.dropIndicatorPosition()
-        self.connect(self, QtCore.SIGNAL("itemChanged(QListWidgetItem *)"), self.itemChanged) 
-        self.connect(self, QtCore.SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.currentItemChanged) 
+        self.connect(self, QtCore.SIGNAL("itemChanged(QListWidgetItem *)"), self.itemChanged)
+ 
+        self.connect(self, QtCore.SIGNAL("currentItemChanged(QListWidgetItem *,QListWidgetItem *)"), self.currentItemChanged)
+ 
         self.past=False
     def currentItemChanged(self,new,old):
         self.closePersistentEditor(old)
@@ -21,21 +23,28 @@ class TaskListWidget(QtGui.QListWidget):
     def keyPressEvent(self,e):
         if e.key()==QtCore.Qt.Key_Escape:
             self.closePersistentEditor(self.currentItem())
-        
+    def mousePressEvent(self,mouseEvent):
+        item=self.itemAt(mouseEvent.pos())
+        if item!=None and item.flags()==QtCore.Qt.ItemFlags():
+            self.clearSelection()
+        else:
+            QtGui.QListWidget.mousePressEvent(self,mouseEvent)
     def mouseDoubleClickEvent(self, mouseEvent):
         item= self.itemAt(mouseEvent.pos())
         if item:
-            if QtCore.Qt.LeftButton == mouseEvent.button():
-                item.done_status
-                if not self.past or item.done_status==None or item.done_status==False:
-                    item.done()
-                    self.emit(QtCore.SIGNAL("taskDone"),item.itemid,item.done_status)
-
-            else: self.openPersistentEditor(item)
+            if item.flags()!=QtCore.Qt.ItemFlags():
+                if QtCore.Qt.LeftButton == mouseEvent.button():
+                    item.done_status
+                    if not self.past or item.done_status==None or item.done_status==False:
+                        item.done()
+                        self.emit(QtCore.SIGNAL("taskDone"),item.itemid,item.done_status)
+    
+                else: self.openPersistentEditor(item)
             
 
     def setDate(self,tdate,week=None):
         self.current=False
+        self.past=False
         self.setAcceptDrops(True)
         self.date=tdate
         self.week=week
@@ -58,7 +67,9 @@ class TaskListWidget(QtGui.QListWidget):
     def itemChanged(self,item, *args):
         if isinstance(item,Task):
             self.emit(QtCore.SIGNAL("editTask"),item.itemid,item.text())
-            self.closePersistentEditor(item)
+            try:
+                self.closePersistentEditor(item)
+            except: pass
     def dragMoveEvent(self, event):
         if event.source().currentItem().done_status or not self.past:
             event.accept()
@@ -84,21 +95,26 @@ class TaskListWidget(QtGui.QListWidget):
         olditem=event.source().currentItem()
         currentrow=event.source().row(olditem)
         item=event.source().takeItem(currentrow)
-        QtGui.QListWidget.dropEvent(self,event)
+        if self.date!="thisweek" or self==event.source() or event.source().week!=getWeekNr():
+            QtGui.QListWidget.dropEvent(self,event)
         newItem=self.findItems(olditem.text(),QtCore.Qt.MatchExactly)[0]
         row=self.row(newItem)
+        
         o=self.takeItem(row)
         del(o)
         if event.source()!=self:
             self.insertItem(row,item)
             self.emit(QtCore.SIGNAL("moveTask"),item,self.date,self.week)
+
         else:
             del(olditem)
             self.insertItem(row,item)  
         event.accept()       
         #self.setEnabled(True)
-        self.emit(QtCore.SIGNAL("sortTasks"),self)
         #self.emit(QtCore.SIGNAL("sortTasks"),event.source())
+
+        self.emit(QtCore.SIGNAL("sortTasks"),self)
+
 class Task(QtGui.QListWidgetItem):
     def __init__(self,text,itemid,done=False,parent=None,*args):
         QtGui.QListWidgetItem.__init__(self, text,parent, *args)
