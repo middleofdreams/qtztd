@@ -34,9 +34,11 @@ class TaskListWidget(QtGui.QListWidget):
         if item:
             if item.flags()!=QtCore.Qt.ItemFlags():
                 if QtCore.Qt.LeftButton == mouseEvent.button():
-                    item.done_status
-                    if not self.past or item.done_status==None or item.done_status==False:
+                    print self.date
+                    if not self.past or item.done_status==None or item.done_status==False or self.date=="outdated":
+                        print "dsasda"
                         item.done()
+                        print item.itemid,item.done_status
                         self.emit(QtCore.SIGNAL("taskDone"),item.itemid,item.done_status)
     
                 else: 
@@ -50,7 +52,7 @@ class TaskListWidget(QtGui.QListWidget):
         self.setAcceptDrops(True)
         self.date=tdate
         self.week=week
-        slist=['inbox','someday','thisweek','waiting']
+        slist=['inbox','someday','thisweek','waiting','outdated']
         if not (tdate in slist):
             qpal=QtGui.QPalette()
             self.week=getWeekNr(day=tdate)

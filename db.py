@@ -72,16 +72,21 @@ class DB(object):
         self.conn.commit()
     def checkIfNew(self,name):
         c=self.conn.cursor()
-        print name
         t=(str(name),)
         c.execute('select * from tasks WHERE name=? COLLATE NOCASE',t)
         r=c.fetchall()
         c.close()
-        print len(r)
         if len(r)==0:
             return False
         else:
             return r[0]
+    def getOutdated(self,currentdate):
+        c=self.conn.cursor()
+        t=(False,currentdate)
+        c.execute('select * from tasks WHERE done=? and due_date<?',t)
+        r=c.fetchall()
+        c.close()
+        return r
     def deleteTask(self,itemid,):
         c=self.conn.cursor()
         t=(itemid,)

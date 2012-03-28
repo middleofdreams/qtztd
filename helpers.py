@@ -27,3 +27,5 @@ def getWeekNr(v=0,day=None):
     else:
         today=date.today()+timedelta(v)
     return today.isocalendar()[1]
+def today():
+    return date.today()

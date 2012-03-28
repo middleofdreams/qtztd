@@ -38,7 +38,10 @@ class MyForm(QtGui.QMainWindow):
         self.ui.delete_label.dropEvent=self.ldropEvent
         self.ui.delete_label.dragMoveEvent=self.ldragMoveEvent
         self.ui.delete_label.dragEnterEvent=self.ldragMoveEvent
-
+        self.ui.outdated_list=TaskListWidget()
+        self.ui.outdated_list.setMaximumSize(9999300,0)
+        self.ui.outdated.addWidget(self.ui.outdated_list)
+        self.connect(self.ui.outdated_list,QtCore.SIGNAL("taskDone"),self.taskDone)
     def fillWeek(self):    
         weekdays,names=daysOfweek(self.v)
         weekdays+=['inbox','someday','waiting',]
@@ -57,6 +60,21 @@ class MyForm(QtGui.QMainWindow):
         self.ui.taskslists[8].week=getWeekNr()
         self.ui.lineeditlist[8].setDate("thisweek")
         self.loadThisWeek()
+        self.loadOutDated()
+    def loadOutDated(self):
+        self.ui.outdated_list.clear()
+        self.ui.outdated_list.setDate('outdated')
+        self.ui.outdated_list.setDate('outdated')
+
+        t=self.db.getOutdated(today())
+        for j in t:
+            self.ui.outdated_list.addItem(Task(j[1],j[0],j[6]))
+        if len(t)>0:
+            self.ui.outdated_label.setMaximumHeight(20)
+            self.ui.outdated_list.setMaximumHeight(200)
+        else:
+            self.ui.outdated_label.setMaximumHeight(0)
+            self.ui.outdated_list.setMaximumHeight(0)
     def loadThisWeek(self):
         self.ui.taskslists[8].clear()
         self.ui.taskslists[8].setDate("thisweek")
@@ -133,7 +151,9 @@ class MyForm(QtGui.QMainWindow):
         return Task(name)
     def taskDone(self,itemid,done):
         self.db.setToDone(itemid,done)
+        print itemid,done
         self.loadThisWeek()
+        self.loadOutDated()
     def resortTask(self,widget):
         items=[]
         pos=[]

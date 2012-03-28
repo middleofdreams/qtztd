@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ztd.ui'
 #
-# Created: Mon Mar 19 08:02:39 2012
+# Created: Wed Mar 28 14:20:04 2012
 #      by: PyQt4 UI code generator 4.8.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -170,9 +170,25 @@ class Ui_MainWindow(object):
         self.bottomPanel.addLayout(self.waiting)
         self.verticalLayout.addWidget(self.bottomPnl)
         self.delete_label = QtGui.QLabel(self.centralwidget)
+        self.delete_label.setMinimumSize(QtCore.QSize(0, 30))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.delete_label.setFont(font)
         self.delete_label.setText(QtGui.QApplication.translate("MainWindow", "Drag here to delete", None, QtGui.QApplication.UnicodeUTF8))
         self.delete_label.setObjectName(_fromUtf8("delete_label"))
         self.verticalLayout.addWidget(self.delete_label)
+        self.outdated = QtGui.QVBoxLayout()
+        self.outdated.setContentsMargins(0, 0, -1, -1)
+        self.outdated.setObjectName(_fromUtf8("outdated"))
+        self.outdated_label = QtGui.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.outdated_label.setFont(font)
+        self.outdated_label.setText(QtGui.QApplication.translate("MainWindow", "There are some unfinished tasks in the past.", None, QtGui.QApplication.UnicodeUTF8))
+        self.outdated_label.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.outdated_label.setObjectName(_fromUtf8("outdated_label"))
+        self.outdated.addWidget(self.outdated_label)
+        self.verticalLayout.addLayout(self.outdated)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1338, 21))
