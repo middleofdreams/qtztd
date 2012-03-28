@@ -77,10 +77,19 @@ class MyForm(QtGui.QMainWindow):
         if date!="thisweek":
             self.loadThisWeek()
 
-    def editTask(self,itemid,name):
-        self.db.editTask(itemid,name)
-        self.loadThisWeek()
-
+    def editTask(self,item):
+        name=str(item.text()).strip()
+        ifnew=self.db.checkIfNew(name)
+        if not ifnew:
+            self.db.editTask(item.itemid,name)
+            self.loadThisWeek()
+        else:
+            old=self.db.getForId(item.itemid)
+            item.setText(str(old[0][1]))
+            msg=QtGui.QMessageBox(self)
+            msg.setWindowTitle("Error")
+            msg.setText("Task already exists. It's marked due date: %s"%str(ifnew[2]))
+            msg.show()
     def createNewTask(self,name,tdate,due_week):
         name=str(name).strip()
         ifnew=self.db.checkIfNew(name)

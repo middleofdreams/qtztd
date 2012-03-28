@@ -10,6 +10,13 @@ class DB(object):
         r=c.fetchall()
         c.close()
         return r
+    def getForId(self,itemid):
+        c=self.conn.cursor()
+        t=(itemid,)
+        c.execute('select * from tasks WHERE id=? ORDER BY pos',t)
+        r=c.fetchall()
+        c.close()
+        return r
     def getForWeek(self,week,withoutdates=False):
         c=self.conn.cursor()
         t=(week,)

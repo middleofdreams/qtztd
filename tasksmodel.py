@@ -39,7 +39,9 @@ class TaskListWidget(QtGui.QListWidget):
                         item.done()
                         self.emit(QtCore.SIGNAL("taskDone"),item.itemid,item.done_status)
     
-                else: self.openPersistentEditor(item)
+                else: 
+                    self.openPersistentEditor(item)
+                    item.editable=True
             
 
     def setDate(self,tdate,week=None):
@@ -66,7 +68,9 @@ class TaskListWidget(QtGui.QListWidget):
 
     def itemChanged(self,item, *args):
         if isinstance(item,Task):
-            self.emit(QtCore.SIGNAL("editTask"),item.itemid,item.text())
+            if item.editable:
+                item.editable=False
+                self.emit(QtCore.SIGNAL("editTask"),item)
             try:
                 self.closePersistentEditor(item)
             except: pass
@@ -122,6 +126,7 @@ class Task(QtGui.QListWidgetItem):
         self.done_status=done
         if done: self.done()
         self.setData(3,itemid)
+        self.editable=False
     def clone(self):
         c= Task(self.text(),self.itemid)
         c.done_status=self.done_status
