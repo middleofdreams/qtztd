@@ -6,15 +6,16 @@ from db import DB
 from tasksmodel import *
 from worker import Worker
 class MyForm(QtGui.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None,dbpath='ztd.sqlite'):
         QtGui.QWidget.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.v=ifWeekend()
-        self.db=DB('ztd.sqlite')
+        self.db=DB(dbpath)
         self.prepareWidgets()
         self.fillWeek()
         self.ui.bottomPnl.hide()
+        self.setWindowTitle("Qt ZTD - simple task management")
         self.options={'bottomPnlHidden':True}
     def prepareWidgets(self):
         self.ui.weekdays=[self.ui.weekday1,self.ui.weekday2,self.ui.weekday3,self.ui.weekday4,self.ui.weekday5,self.ui.inbox,self.ui.someday,self.ui.waiting,self.ui.thisweek]
@@ -158,8 +159,10 @@ class MyForm(QtGui.QMainWindow):
         e.accept()
  
 if __name__ == "__main__":
-    
     app = QtGui.QApplication(sys.argv)
-    myapp = MyForm()
+    if len(sys.argv)==2:
+        myapp = MyForm(dbpath=sys.argv[1])
+    else:
+        myapp = MyForm()
     myapp.show()
     sys.exit(app.exec_())

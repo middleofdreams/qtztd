@@ -1,6 +1,6 @@
 from datetime import date,timedelta,time
 def daysOfweek(v=0):
-    names=["Monday","Tuesday","Thursday","Wednesday","Friday","Saturday","Sunday"]
+    names=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
     today=date.today()
     weekday=today.weekday()
     firstday=today-timedelta(weekday)+timedelta(v)

@@ -144,7 +144,7 @@ class TaskLineEdit(QtGui.QLineEdit):
     def __init__(self,date=None,parent=None,*args):
         QtGui.QLineEdit.__init__(self,parent, *args)
         self.connect(self, QtCore.SIGNAL("returnPressed()"), self.returnPressed) 
-        self.setMaxLength(30)
+        self.setMaxLength(255)
     def setDate(self,ldate,week=None):
         self.date=ldate
         self.week=week
