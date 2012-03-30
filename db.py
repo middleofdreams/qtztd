@@ -80,10 +80,10 @@ class DB(object):
             return False
         else:
             return r[0]
-    def getOutdated(self,currentdate):
+    def getOutdated(self,currentdate,currentweek):
         c=self.conn.cursor()
-        t=(False,currentdate)
-        c.execute('select * from tasks WHERE done=? and due_date<?',t)
+        t=(False,currentdate,currentweek)
+        c.execute('select * from tasks WHERE (done=? or done is NULL) and (due_date<? or (due_date="thisweek" and due_week<?)) ',t)
         r=c.fetchall()
         c.close()
         return r

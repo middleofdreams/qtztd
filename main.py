@@ -42,6 +42,7 @@ class MyForm(QtGui.QMainWindow):
         self.ui.outdated_list.setMaximumSize(9999300,0)
         self.ui.outdated.addWidget(self.ui.outdated_list)
         self.connect(self.ui.outdated_list,QtCore.SIGNAL("taskDone"),self.taskDone)
+        self.connect(self.ui.outdated_list,QtCore.SIGNAL("editTask"),self.editTask)
     def fillWeek(self):    
         weekdays,names=daysOfweek(self.v)
         weekdays+=['inbox','someday','waiting',]
@@ -66,7 +67,7 @@ class MyForm(QtGui.QMainWindow):
         self.ui.outdated_list.setDate('outdated')
         self.ui.outdated_list.setDate('outdated')
 
-        t=self.db.getOutdated(today())
+        t=self.db.getOutdated(today(),getWeekNr())
         for j in t:
             self.ui.outdated_list.addItem(Task(j[1],j[0],j[6]))
         if len(t)>0:
