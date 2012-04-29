@@ -33,6 +33,7 @@ class MyForm(QtGui.QMainWindow):
             self.connect(lineedit,QtCore.SIGNAL("createTask"),self.createNewTask)
             self.connect(taskwidget,QtCore.SIGNAL("taskDone"),self.taskDone)
             self.connect(taskwidget,QtCore.SIGNAL("sortTasks"),self.resortTask)
+            self.connect(taskwidget,QtCore.SIGNAL("loadOutdated"),self.loadOutDated)
 
         self.ui.delete_label.setAcceptDrops(True)
         self.ui.delete_label.dropEvent=self.ldropEvent
@@ -43,6 +44,9 @@ class MyForm(QtGui.QMainWindow):
         self.ui.outdated.addWidget(self.ui.outdated_list)
         self.connect(self.ui.outdated_list,QtCore.SIGNAL("taskDone"),self.taskDone)
         self.connect(self.ui.outdated_list,QtCore.SIGNAL("editTask"),self.editTask)
+        self.connect(self.ui.outdated_list,QtCore.SIGNAL("loadOutdated"),self.loadOutDated)
+
+
     def fillWeek(self):    
         weekdays,names=daysOfweek(self.v)
         weekdays+=['inbox','someday','waiting',]

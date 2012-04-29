@@ -120,6 +120,7 @@ class TaskListWidget(QtGui.QListWidget):
         #self.emit(QtCore.SIGNAL("sortTasks"),event.source())
 
         self.emit(QtCore.SIGNAL("sortTasks"),self)
+        if event.source().date=="outdated":self.emit(QtCore.SIGNAL("loadOutdated"),event.source())
 
 class Task(QtGui.QListWidgetItem):
     def __init__(self,text,itemid,done=False,parent=None,*args):
@@ -127,7 +128,7 @@ class Task(QtGui.QListWidgetItem):
         self.itemid=itemid
         self.done_status=done
         if done: self.done()
-        self.setData(3,itemid)
+#       self.setData(3,itemid)
         self.editable=False
     def clone(self):
         c= Task(self.text(),self.itemid)
@@ -157,6 +158,8 @@ class TaskLineEdit(QtGui.QLineEdit):
                 self.setDisabled(True)
             else:
                 self.setEnabled(True)
+        elif self.date=="thisweek":
+            self.week=getWeekNr()
         
     def returnPressed(self):
         if not unicode(self.text()).strip()=="":
